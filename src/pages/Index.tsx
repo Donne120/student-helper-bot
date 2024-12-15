@@ -1,21 +1,13 @@
-import { useState, useRef, useEffect } from "react";
-import { ChatMessage } from "@/components/ChatMessage";
-import { ChatInput } from "@/components/ChatInput";
-import { SuggestedPrompt } from "@/components/SuggestedPrompt";
-import { UserProfile } from "@/components/UserProfile";
+import { useState, useEffect } from "react";
 import { SignupForm } from "@/components/SignupForm";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserProfile } from "@/components/UserProfile";
+import { SuggestedPrompt } from "@/components/SuggestedPrompt";
+import { ChatContainer } from "@/components/ChatContainer";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { Book, Clock, History, Lightbulb, BookOpen, Calculator } from "lucide-react";
 import { toast } from "sonner";
-
-interface Message {
-  id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-}
+import { checkHealth } from "@/services/api";
 
 interface User {
   email: string;
@@ -56,111 +48,27 @@ const suggestedPrompts = [
 ];
 
 const Index = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      content: "Hello! I'm your ALU Student Companion. How can I help you today?",
-      isUser: false,
-      timestamp: new Date(),
-    },
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const checkBackendHealth = async () => {
+      const isHealthy = await checkHealth();
+      if (!isHealthy) {
+        toast.error("Unable to connect to AI service. Some features may be limited.");
+      }
+    };
+
+    checkBackendHealth();
+  }, []);
 
   const handleSignup = async (data: { email: string; name: string }) => {
-    // In a real app, you would handle the signup with a backend service
     setUser(data);
     toast.success(`Welcome, ${data.name}!`);
   };
 
   const handleClearChat = () => {
-    setMessages([
-      {
-        id: "welcome",
-        content: "Chat cleared. How can I help you today?",
-        isUser: false,
-        timestamp: new Date(),
-      },
-    ]);
+    window.location.reload();
     toast.success("Chat cleared successfully");
-  };
-
-  const handleSendMessage = async (content: string) => {
-    if (!user) {
-      toast.error("Please sign up to send messages");
-      return;
-    }
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content,
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setIsTyping(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "I understand your question. Let me help you with that...",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsTyping(false);
-    }, 1500);
-  };
-
-  const handleEditMessage = (messageId: string, newContent: string) => {
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === messageId ? { ...msg, content: newContent } : msg
-      )
-    );
-  };
-
-  const handleSendAudio = async (blob: Blob) => {
-    if (!user) {
-      toast.error("Please sign up to send voice messages");
-      return;
-    }
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: "🎤 Voice message sent",
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-  };
-
-  const handleFileUpload = async (file: File) => {
-    if (!user) {
-      toast.error("Please sign up to upload files");
-      return;
-    }
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: `📎 Uploaded: ${file.name}`,
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
   };
 
   if (!user) {
@@ -171,7 +79,9 @@ const Index = () => {
           alt="ALU Logo"
           className="h-12 mb-8"
         />
-        <h1 className="text-2xl font-semibold mb-8">Welcome to ALU Student Companion</h1>
+        <h1 className="text-2xl font-semibold mb-8">
+          Welcome to ALU Student Companion
+        </h1>
         <SignupForm onSignup={handleSignup} />
       </div>
     );
@@ -211,49 +121,25 @@ const Index = () => {
                   title={prompt.title}
                   description={prompt.description}
                   icon={prompt.icon}
-                  onClick={() => handleSendMessage(prompt.title)}
+                  onClick={() => {
+                    const chatContainer = document.querySelector(
+                      "main"
+                    ) as HTMLElement;
+                    const input = chatContainer?.querySelector(
+                      "input"
+                    ) as HTMLInputElement;
+                    if (input) {
+                      input.value = prompt.title;
+                      input.focus();
+                    }
+                  }}
                 />
               ))}
             </div>
           </div>
         </aside>
 
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message.content}
-                  isUser={message.isUser}
-                  timestamp={message.timestamp}
-                  onEdit={message.isUser ? (newContent) => handleEditMessage(message.id, newContent) : undefined}
-                />
-              ))}
-              {isTyping && (
-                <div className="flex gap-3">
-                  <img
-                    src="/lovable-uploads/e416da77-8f14-4c29-99a1-e7af0cf8dccf.png"
-                    alt="ALU_SC"
-                    className="w-8 h-8"
-                  />
-                  <div className="typing-indicator">
-                    <span className="typing-dot"></span>
-                    <span className="typing-dot"></span>
-                    <span className="typing-dot"></span>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
-
-          <ChatInput
-            onSendMessage={handleSendMessage}
-            onSendAudio={handleSendAudio}
-            onFileUpload={handleFileUpload}
-          />
-        </main>
+        <ChatContainer user={user} />
       </div>
     </div>
   );
