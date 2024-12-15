@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { SuggestedPrompt } from "@/components/SuggestedPrompt";
+import { UserProfile } from "@/components/UserProfile";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Book, Clock, History } from "lucide-react";
+import { Book, Clock, History, Lightbulb, BookOpen, Calculator } from "lucide-react";
 
 interface Message {
   id: string;
@@ -27,6 +28,21 @@ const suggestedPrompts = [
     title: "Study techniques",
     description: "Learn effective study methods",
     icon: History,
+  },
+  {
+    title: "Research assistance",
+    description: "Help with academic research",
+    icon: BookOpen,
+  },
+  {
+    title: "Math problem solver",
+    description: "Step-by-step math solutions",
+    icon: Calculator,
+  },
+  {
+    title: "Learning strategies",
+    description: "Personalized learning tips",
+    icon: Lightbulb,
   },
 ];
 
@@ -74,12 +90,17 @@ const Index = () => {
     }, 1500);
   };
 
+  const handleEditMessage = (messageId: string, newContent: string) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, content: newContent }
+          : msg
+      )
+    );
+  };
+
   const handleSendAudio = async (blob: Blob) => {
-    // Here you would typically:
-    // 1. Convert audio to text using a speech-to-text service
-    // 2. Send the text to your AI service
-    // 3. Get the response and add it to messages
-    
     const userMessage: Message = {
       id: Date.now().toString(),
       content: "🎤 Voice message sent",
@@ -91,12 +112,6 @@ const Index = () => {
   };
 
   const handleFileUpload = async (file: File) => {
-    // Here you would typically:
-    // 1. Upload the file to a storage service
-    // 2. Process the file (OCR for images, text extraction for PDFs)
-    // 3. Send the content to your AI service
-    // 4. Get the response and add it to messages
-
     const userMessage: Message = {
       id: Date.now().toString(),
       content: `📎 Uploaded: ${file.name}`,
@@ -120,54 +135,61 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col overflow-hidden p-4">
-        {messages.length === 1 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            {suggestedPrompts.map((prompt) => (
-              <SuggestedPrompt
-                key={prompt.title}
-                title={prompt.title}
-                description={prompt.description}
-                onClick={() => handleSendMessage(prompt.title)}
-              />
-            ))}
-          </div>
-        )}
-
-        <ScrollArea className="flex-1">
-          <div className="space-y-4 pb-4">
-            {messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                message={message.content}
-                isUser={message.isUser}
-                timestamp={message.timestamp}
-              />
-            ))}
-            {isTyping && (
-              <div className="flex gap-3">
-                <img
-                  src="/lovable-uploads/e416da77-8f14-4c29-99a1-e7af0cf8dccf.png"
-                  alt="ALU_SC"
-                  className="w-8 h-8"
+      <div className="flex flex-1 overflow-hidden">
+        <aside className="w-64 border-r hidden md:block">
+          <UserProfile />
+          <div className="p-4">
+            <h2 className="font-semibold mb-4">Suggested Prompts</h2>
+            <div className="space-y-2">
+              {suggestedPrompts.map((prompt) => (
+                <SuggestedPrompt
+                  key={prompt.title}
+                  title={prompt.title}
+                  description={prompt.description}
+                  onClick={() => handleSendMessage(prompt.title)}
                 />
-                <div className="typing-indicator">
-                  <span className="typing-dot"></span>
-                  <span className="typing-dot"></span>
-                  <span className="typing-dot"></span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
+              ))}
+            </div>
           </div>
-        </ScrollArea>
-      </main>
+        </aside>
 
-      <ChatInput
-        onSendMessage={handleSendMessage}
-        onSendAudio={handleSendAudio}
-        onFileUpload={handleFileUpload}
-      />
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message.content}
+                  isUser={message.isUser}
+                  timestamp={message.timestamp}
+                  onEdit={message.isUser ? (newContent) => handleEditMessage(message.id, newContent) : undefined}
+                />
+              ))}
+              {isTyping && (
+                <div className="flex gap-3">
+                  <img
+                    src="/lovable-uploads/e416da77-8f14-4c29-99a1-e7af0cf8dccf.png"
+                    alt="ALU_SC"
+                    className="w-8 h-8"
+                  />
+                  <div className="typing-indicator">
+                    <span className="typing-dot"></span>
+                    <span className="typing-dot"></span>
+                    <span className="typing-dot"></span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            onSendAudio={handleSendAudio}
+            onFileUpload={handleFileUpload}
+          />
+        </main>
+      </div>
     </div>
   );
 };
