@@ -18,7 +18,7 @@ This project is built with:
 - React 18 with TypeScript
 - Tailwind CSS for styling
 - Shadcn/UI components
-- Real-time voice recording
+- Real-time voice recording.
 - File upload handling
 - Screenshot capture functionality
 
