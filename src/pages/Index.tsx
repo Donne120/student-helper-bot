@@ -210,6 +210,7 @@ const Index = () => {
                   key={prompt.title}
                   title={prompt.title}
                   description={prompt.description}
+                  icon={prompt.icon}
                   onClick={() => handleSendMessage(prompt.title)}
                 />
               ))}

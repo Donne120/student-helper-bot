@@ -16,14 +16,16 @@ const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
 });
 
+type FormData = z.infer<typeof formSchema>;
+
 interface SignupFormProps {
-  onSignup: (data: { email: string; name: string }) => void;
+  onSignup: (data: FormData) => void;
 }
 
 export const SignupForm = ({ onSignup }: SignupFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -31,7 +33,7 @@ export const SignupForm = ({ onSignup }: SignupFormProps) => {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: FormData) => {
     try {
       setIsLoading(true);
       await onSignup(data);
