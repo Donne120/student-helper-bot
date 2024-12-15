@@ -3,14 +3,23 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { SuggestedPrompt } from "@/components/SuggestedPrompt";
 import { UserProfile } from "@/components/UserProfile";
+import { SignupForm } from "@/components/SignupForm";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { Book, Clock, History, Lightbulb, BookOpen, Calculator } from "lucide-react";
+import { toast } from "sonner";
 
 interface Message {
   id: string;
   content: string;
   isUser: boolean;
   timestamp: Date;
+}
+
+interface User {
+  email: string;
+  name: string;
 }
 
 const suggestedPrompts = [
@@ -56,6 +65,7 @@ const Index = () => {
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -66,7 +76,30 @@ const Index = () => {
     scrollToBottom();
   }, [messages]);
 
+  const handleSignup = async (data: { email: string; name: string }) => {
+    // In a real app, you would handle the signup with a backend service
+    setUser(data);
+    toast.success(`Welcome, ${data.name}!`);
+  };
+
+  const handleClearChat = () => {
+    setMessages([
+      {
+        id: "welcome",
+        content: "Chat cleared. How can I help you today?",
+        isUser: false,
+        timestamp: new Date(),
+      },
+    ]);
+    toast.success("Chat cleared successfully");
+  };
+
   const handleSendMessage = async (content: string) => {
+    if (!user) {
+      toast.error("Please sign up to send messages");
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       content,
@@ -93,14 +126,17 @@ const Index = () => {
   const handleEditMessage = (messageId: string, newContent: string) => {
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === messageId
-          ? { ...msg, content: newContent }
-          : msg
+        msg.id === messageId ? { ...msg, content: newContent } : msg
       )
     );
   };
 
   const handleSendAudio = async (blob: Blob) => {
+    if (!user) {
+      toast.error("Please sign up to send voice messages");
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       content: "🎤 Voice message sent",
@@ -112,6 +148,11 @@ const Index = () => {
   };
 
   const handleFileUpload = async (file: File) => {
+    if (!user) {
+      toast.error("Please sign up to upload files");
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       content: `📎 Uploaded: ${file.name}`,
@@ -121,6 +162,20 @@ const Index = () => {
 
     setMessages((prev) => [...prev, userMessage]);
   };
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+        <img
+          src="/lovable-uploads/e416da77-8f14-4c29-99a1-e7af0cf8dccf.png"
+          alt="ALU Logo"
+          className="h-12 mb-8"
+        />
+        <h1 className="text-2xl font-semibold mb-8">Welcome to ALU Student Companion</h1>
+        <SignupForm onSignup={handleSignup} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -133,11 +188,20 @@ const Index = () => {
           />
           <h1 className="text-xl font-semibold">ALU Student Companion</h1>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleClearChat}
+          className="text-muted-foreground hover:text-foreground"
+          title="Clear chat"
+        >
+          <Trash2 className="h-5 w-5" />
+        </Button>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-64 border-r hidden md:block">
-          <UserProfile />
+          <UserProfile user={user} />
           <div className="p-4">
             <h2 className="font-semibold mb-4">Suggested Prompts</h2>
             <div className="space-y-2">
