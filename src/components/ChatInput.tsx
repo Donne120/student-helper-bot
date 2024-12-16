@@ -91,7 +91,7 @@ export const ChatInput = () => {
   };
 
   return (
-    <div className="flex gap-2 items-center p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="flex gap-2 items-center p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mt-auto">
       <input
         type="file"
         ref={fileInputRef}

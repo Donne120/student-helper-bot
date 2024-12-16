@@ -4,8 +4,8 @@ import { UserProfile } from "@/components/UserProfile";
 import { SuggestedPrompt } from "@/components/SuggestedPrompt";
 import { ChatContainer } from "@/components/ChatContainer";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { Book, Clock, History, Lightbulb, BookOpen, Calculator } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Trash2, Book, Clock, History, Lightbulb, BookOpen, Calculator } from "lucide-react";
 import { toast } from "sonner";
 import { checkHealth } from "@/services/api";
 
@@ -17,32 +17,32 @@ interface User {
 const suggestedPrompts = [
   {
     title: "Explain a complex topic",
-    description: "Break down difficult concepts",
+    description: "Break down difficult concepts in academic format",
     icon: Book,
   },
   {
     title: "Help with homework",
-    description: "Get step-by-step guidance",
+    description: "Get step-by-step academic guidance",
     icon: Clock,
   },
   {
     title: "Study techniques",
-    description: "Learn effective study methods",
+    description: "Learn effective academic study methods",
     icon: History,
   },
   {
     title: "Research assistance",
-    description: "Help with academic research",
+    description: "Help with academic research and citations",
     icon: BookOpen,
   },
   {
     title: "Math problem solver",
-    description: "Step-by-step math solutions",
+    description: "Step-by-step mathematical solutions with explanations",
     icon: Calculator,
   },
   {
     title: "Learning strategies",
-    description: "Personalized learning tips",
+    description: "Personalized academic learning tips",
     icon: Lightbulb,
   },
 ];
@@ -112,30 +112,27 @@ const Index = () => {
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-64 border-r hidden md:block">
           <UserProfile user={user} />
-          <div className="p-4">
+          <div className="p-4 h-[calc(100vh-12rem)]">
             <h2 className="font-semibold mb-4">Suggested Prompts</h2>
-            <div className="space-y-2">
-              {suggestedPrompts.map((prompt) => (
-                <SuggestedPrompt
-                  key={prompt.title}
-                  title={prompt.title}
-                  description={prompt.description}
-                  icon={prompt.icon}
-                  onClick={() => {
-                    const chatContainer = document.querySelector(
-                      "main"
-                    ) as HTMLElement;
-                    const input = chatContainer?.querySelector(
-                      "input"
-                    ) as HTMLInputElement;
-                    if (input) {
-                      input.value = prompt.title;
-                      input.focus();
-                    }
-                  }}
-                />
-              ))}
-            </div>
+            <ScrollArea className="h-full pr-4">
+              <div className="space-y-2">
+                {suggestedPrompts.map((prompt) => (
+                  <SuggestedPrompt
+                    key={prompt.title}
+                    title={prompt.title}
+                    description={prompt.description}
+                    icon={prompt.icon}
+                    onClick={() => {
+                      const input = document.querySelector('input[placeholder="Send a message..."]') as HTMLInputElement;
+                      if (input) {
+                        input.value = `${prompt.title}:\n\nPlease provide a detailed response in academic format, including:\n\n1. Introduction\n2. Main points with clear explanations\n3. Examples or applications\n4. Conclusion\n5. References (if applicable)`;
+                        input.focus();
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
           </div>
         </aside>
 
