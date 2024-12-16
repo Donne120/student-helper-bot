@@ -21,6 +21,38 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
     setIsEditing(false);
   };
 
+  const formatMessage = (text: string) => {
+    // Split the message into paragraphs
+    const paragraphs = text.split('\n\n');
+    
+    return paragraphs.map((paragraph, index) => {
+      // Check if it's a numbered point (e.g., "1. Introduction")
+      if (/^\d+\.\s/.test(paragraph)) {
+        return (
+          <div key={index} className="mb-4">
+            <h3 className="text-base font-semibold mb-2">{paragraph}</h3>
+          </div>
+        );
+      }
+      
+      // Check if it's a section title (e.g., "Introduction:")
+      if (paragraph.endsWith(':')) {
+        return (
+          <h2 key={index} className="text-lg font-bold mb-3 mt-4">
+            {paragraph}
+          </h2>
+        );
+      }
+      
+      // Regular paragraphs
+      return (
+        <p key={index} className="text-sm mb-3 leading-relaxed">
+          {paragraph}
+        </p>
+      );
+    });
+  };
+
   return (
     <div
       className={cn(
@@ -37,7 +69,7 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
       </Avatar>
       <Card
         className={cn(
-          "p-3 max-w-[80%] relative group",
+          "p-4 max-w-[80%] relative group prose prose-sm",
           isUser ? "bg-primary text-primary-foreground" : "bg-secondary"
         )}
       >
@@ -49,8 +81,10 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
           />
         ) : (
           <>
-            <p className="text-sm">{message}</p>
-            <time className="text-xs opacity-70 mt-1 block">
+            <div className="space-y-1">
+              {formatMessage(message)}
+            </div>
+            <time className="text-xs opacity-70 mt-3 block">
               {timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </time>
             {isUser && (

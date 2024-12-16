@@ -1,10 +1,9 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage } from "@/components/ChatMessage";
-import { Message } from "@/types/chat";
 import { useMessageContext } from "@/contexts/MessageContext";
 
 export const MessageList = () => {
-  const { messages, isTyping } = useMessageContext();
+  const { messages, isTyping, handleEditMessage } = useMessageContext();
   
   return (
     <ScrollArea className="flex-1 p-4">
