@@ -29,8 +29,8 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
       // Check if it's a numbered point (e.g., "1. Introduction")
       if (/^\d+\.\s/.test(paragraph)) {
         return (
-          <div key={index} className="mb-4">
-            <h3 className="text-base font-semibold mb-2">{paragraph}</h3>
+          <div key={index} className="mb-6">
+            <h3 className="text-base font-semibold">{paragraph}</h3>
           </div>
         );
       }
@@ -38,7 +38,7 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
       // Check if it's a section title (e.g., "Introduction:")
       if (paragraph.endsWith(':')) {
         return (
-          <h2 key={index} className="text-lg font-bold mb-3 mt-4">
+          <h2 key={index} className="text-lg font-bold mb-4 mt-6 border-b pb-2">
             {paragraph}
           </h2>
         );
@@ -46,7 +46,7 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
       
       // Regular paragraphs
       return (
-        <p key={index} className="text-sm mb-3 leading-relaxed">
+        <p key={index} className="text-sm mb-4 leading-relaxed">
           {paragraph}
         </p>
       );
@@ -69,7 +69,7 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
       </Avatar>
       <Card
         className={cn(
-          "p-4 max-w-[80%] relative group prose prose-sm",
+          "p-6 max-w-[80%] relative group prose prose-sm",
           isUser ? "bg-primary text-primary-foreground" : "bg-secondary"
         )}
       >
@@ -81,10 +81,10 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
           />
         ) : (
           <>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {formatMessage(message)}
             </div>
-            <time className="text-xs opacity-70 mt-3 block">
+            <time className="text-xs opacity-70 mt-4 block border-t pt-2">
               {timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </time>
             {isUser && (
