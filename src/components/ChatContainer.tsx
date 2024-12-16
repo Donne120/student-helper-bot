@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
-import { sendMessage } from "@/services/api";
+import { sendMessage, analyzeFile, transcribeAudio } from "@/services/api";
 import { toast } from "sonner";
 
 interface Message {
@@ -71,12 +71,36 @@ export const ChatContainer = ({ user }: ChatContainerProps) => {
     }
   };
 
-  const handleEditMessage = (messageId: string, newContent: string) => {
+  const handleEditMessage = async (messageId: string, newContent: string) => {
     setMessages((prev) =>
       prev.map((msg) =>
         msg.id === messageId ? { ...msg, content: newContent } : msg
       )
     );
+
+    // Regenerate AI response after edit
+    setIsTyping(true);
+    try {
+      const response = await sendMessage(newContent);
+      setMessages((prev) => {
+        const editedMessageIndex = prev.findIndex((msg) => msg.id === messageId);
+        if (editedMessageIndex !== -1 && editedMessageIndex < prev.length - 1) {
+          const newMessages = [...prev];
+          newMessages[editedMessageIndex + 1] = {
+            id: Date.now().toString(),
+            content: response,
+            isUser: false,
+            timestamp: new Date(),
+          };
+          return newMessages;
+        }
+        return prev;
+      });
+    } catch (error) {
+      console.error("Failed to regenerate AI response:", error);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleSendAudio = async (blob: Blob) => {
@@ -93,6 +117,32 @@ export const ChatContainer = ({ user }: ChatContainerProps) => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    setIsTyping(true);
+
+    try {
+      const transcription = await transcribeAudio(blob);
+      const response = await sendMessage(transcription);
+      
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          content: `Transcription: ${transcription}`,
+          isUser: true,
+          timestamp: new Date(),
+        },
+        {
+          id: (Date.now() + 1).toString(),
+          content: response,
+          isUser: false,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (error) {
+      console.error("Failed to process voice message:", error);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleFileUpload = async (file: File) => {
@@ -103,12 +153,28 @@ export const ChatContainer = ({ user }: ChatContainerProps) => {
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: `📎 Uploaded: ${file.name}`,
+      content: `📎 Analyzing: ${file.name}`,
       isUser: true,
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    setIsTyping(true);
+
+    try {
+      const analysis = await analyzeFile(file);
+      const aiMessage: Message = {
+        id: Date.now().toString(),
+        content: analysis,
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("Failed to analyze file:", error);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
