@@ -3,27 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mic, Send, Upload, Camera } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useMessageContext } from "@/contexts/MessageContext";
 
-interface ChatInputProps {
-  onSendMessage: (message: string) => void;
-  onSendAudio: (blob: Blob) => void;
-  onFileUpload: (file: File) => void;
-}
-
-export const ChatInput = ({
-  onSendMessage,
-  onSendAudio,
-  onFileUpload,
-}: ChatInputProps) => {
+export const ChatInput = () => {
   const [message, setMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { handleSendMessage, handleSendAudio, handleFileUpload } = useMessageContext();
 
   const handleSend = () => {
     if (message.trim()) {
-      onSendMessage(message);
+      handleSendMessage(message);
       setMessage("");
     }
   };
@@ -47,7 +39,7 @@ export const ChatInput = ({
 
       mediaRecorder.current.onstop = () => {
         const blob = new Blob(chunks, { type: "audio/webm" });
-        onSendAudio(blob);
+        handleSendAudio(blob);
         stream.getTracks().forEach((track) => track.stop());
       };
 
@@ -69,21 +61,6 @@ export const ChatInput = ({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith("image/") || file.type === "application/pdf") {
-        onFileUpload(file);
-      } else {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload an image or PDF file",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
   const takeScreenshot = async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
@@ -101,7 +78,7 @@ export const ChatInput = ({
       canvas.toBlob((blob) => {
         if (blob) {
           const file = new File([blob], "screenshot.png", { type: "image/png" });
-          onFileUpload(file);
+          handleFileUpload(file);
         }
       }, "image/png");
     } catch (error) {
@@ -120,7 +97,10 @@ export const ChatInput = ({
         ref={fileInputRef}
         className="hidden"
         accept="image/*,.pdf"
-        onChange={handleFileUpload}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFileUpload(file);
+        }}
       />
       <Button
         variant="ghost"
