@@ -29,8 +29,10 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
       // Check if it's a numbered point (e.g., "1. Introduction")
       if (/^\d+\.\s/.test(paragraph)) {
         return (
-          <div key={index} className="mb-8 pl-4">
-            <p className="text-base leading-relaxed">{paragraph}</p>
+          <div key={index} className="mb-8">
+            <p className="text-base leading-relaxed pl-0">
+              {paragraph}
+            </p>
           </div>
         );
       }
@@ -62,7 +64,7 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
     >
       <Avatar className="w-8 h-8">
         <img
-          src={isUser ? "/placeholder.svg" : "/lovable-uploads/e416da77-8f14-4c29-99a1-e7af0cf8dccf.png"}
+          src={isUser ? "/placeholder.svg" : "/lovable-uploads/a8505b92-320f-4416-ad66-216a21832f0b.png"}
           alt={isUser ? "User" : "ALU_SC"}
           className="object-cover"
         />

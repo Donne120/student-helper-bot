@@ -24,7 +24,7 @@ export const MessageList = () => {
         {isTyping && (
           <div className="flex gap-3">
             <img
-              src="/lovable-uploads/e416da77-8f14-4c29-99a1-e7af0cf8dccf.png"
+              src="/lovable-uploads/a8505b92-320f-4416-ad66-216a21832f0b.png"
               alt="ALU_SC"
               className="w-8 h-8"
             />
