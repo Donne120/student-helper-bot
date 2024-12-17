@@ -75,7 +75,7 @@ const Index = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
         <img
-          src="/lovable-uploads/e416da77-8f14-4c29-99a1-e7af0cf8dccf.png"
+          src="/lovable-uploads/a8505b92-320f-4416-ad66-216a21832f0b.png"
           alt="ALU Logo"
           className="h-12 mb-8"
         />
@@ -92,7 +92,7 @@ const Index = () => {
       <header className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
           <img
-            src="/lovable-uploads/e416da77-8f14-4c29-99a1-e7af0cf8dccf.png"
+            src="/lovable-uploads/a8505b92-320f-4416-ad66-216a21832f0b.png"
             alt="ALU Logo"
             className="h-8"
           />
