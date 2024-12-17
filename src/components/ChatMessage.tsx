@@ -22,31 +22,46 @@ export const ChatMessage = ({ message, isUser, timestamp, onEdit }: ChatMessageP
   };
 
   const formatMessage = (text: string) => {
-    // Split the message into paragraphs
     const paragraphs = text.split('\n\n');
     
     return paragraphs.map((paragraph, index) => {
-      // Check if it's a numbered point (e.g., "1. Introduction")
-      if (/^\d+\.\s/.test(paragraph)) {
+      // Check if it's a numbered point
+      if (/^\d+\./.test(paragraph)) {
+        const [number, ...contentParts] = paragraph.split('.');
+        const content = contentParts.join('.').trim();
+        
         return (
-          <div key={index} className="mb-8 pl-4">
-            <p className="text-base leading-relaxed">{paragraph}</p>
+          <div key={index} className="mb-8">
+            <div className="font-semibold mb-2">
+              Point {number}:
+            </div>
+            <div className="pl-6">
+              {content}
+            </div>
           </div>
         );
       }
       
-      // Check if it's a section title (e.g., "Introduction:")
-      if (paragraph.endsWith(':')) {
-        return (
-          <h2 key={index} className="text-lg font-bold mb-6 mt-8 border-b pb-2">
-            {paragraph}
-          </h2>
-        );
+      // Check if it's a numerical value
+      if (paragraph.includes('(') && paragraph.includes(')')) {
+        const matches = paragraph.match(/(\d+)\s*\(([^)]+)\)/);
+        if (matches) {
+          return (
+            <div key={index} className="mb-8">
+              <div className="font-semibold mb-2">
+                Numerical Value:
+              </div>
+              <div className="pl-6">
+                {matches[2]} ({matches[1]})
+              </div>
+            </div>
+          );
+        }
       }
       
       // Regular paragraphs
       return (
-        <p key={index} className="text-sm mb-6 leading-relaxed">
+        <p key={index} className="mb-6 leading-relaxed">
           {paragraph}
         </p>
       );
